@@ -2,10 +2,10 @@ var path = require('path')
 var webpack = require('webpack')
 
 module.exports = {
-  entry: './src/vue-aplayer.vue',
+  entry: './src/vue-aplayer_ui-customizable.vue',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'vue-aplayer.min.js',
+    filename: 'vue-aplayer_ui-customizable.min.js',
     library: 'VueAPlayer',
     libraryTarget: 'umd',
     libraryExport: 'default',
