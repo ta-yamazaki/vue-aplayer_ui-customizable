@@ -7,3 +7,10 @@
 - show/hide player controls
 - change lyris aria height
 - and more...
+
+
+## License
+
+Vue-APlayer is [MIT Licensed](https://github.com/SevenOutman/vue-aplayer/blob/master/LICENSE). 
+
+Copyright (c) 2016-present Shenghao "Doma" Lei
