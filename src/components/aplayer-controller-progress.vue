@@ -1,28 +1,28 @@
 <template>
   <div
+    ref="barWrap"
     class="aplayer-bar-wrap"
     @mousedown="onThumbMouseDown"
     @touchstart="onThumbTouchStart"
-    ref="barWrap"
   >
     <div class="aplayer-bar">
       <div
-        class="aplayer-loaded"
-        :style="{width: `${loadProgress * 100}%`}">
+        :style="{width: `${loadProgress * 100}%`}"
+        class="aplayer-loaded">
       </div>
       <div
-        class="aplayer-played"
         :style="{width: `${playProgress * 100}%`, background: theme}"
+        class="aplayer-played"
       >
         <span
           ref="thumb"
-          @mouseover="thumbHovered = true"
-          @mouseout="thumbHovered = false"
-          class="aplayer-thumb"
           :style="{borderColor:　theme, backgroundColor: thumbHovered ? theme : '#fff'}"
+          class="aplayer-thumb"
+          @mouseout="thumbHovered = false"
+          @mouseover="thumbHovered = true"
         >
-          <span class="aplayer-loading-icon"
-                :style="{backgroundColor: theme }"
+          <span :style="{backgroundColor: theme }"
+                class="aplayer-loading-icon"
           >
             <icon type="loading"/>
           </span>
@@ -33,169 +33,170 @@
 </template>
 
 <script>
-  import {getElementViewLeft} from '../utils'
-  import Icon from './aplayer-icon.vue'
+import {getElementViewLeft} from '../utils'
+import Icon from './aplayer-icon.vue'
 
-  export default {
-    components: {
-      Icon
+export default {
+  components: {
+    Icon
+  },
+  props: ['loadProgress', 'playProgress', 'theme'],
+  data() {
+    return {
+      thumbHovered: false,
+    }
+  },
+  methods: {
+    onThumbMouseDown(e) {
+      const barWidth = this.$refs.barWrap.clientWidth
+      let percentage = (e.clientX - getElementViewLeft(this.$refs.barWrap)) / barWidth
+      percentage = percentage > 0 ? percentage : 0
+      percentage = percentage < 1 ? percentage : 1
+
+      this.$emit('dragbegin', percentage)
+      document.addEventListener('mousemove', this.onDocumentMouseMove)
+      document.addEventListener('mouseup', this.onDocumentMouseUp)
     },
-    props: ['loadProgress', 'playProgress', 'theme'],
-    data () {
-      return {
-        thumbHovered: false,
-      }
+    onDocumentMouseMove(e) {
+      const barWidth = this.$refs.barWrap.clientWidth
+      let percentage = (e.clientX - getElementViewLeft(this.$refs.barWrap)) / barWidth
+      percentage = percentage > 0 ? percentage : 0
+      percentage = percentage < 1 ? percentage : 1
+
+      this.$emit('dragging', percentage)
     },
-    methods: {
-      onThumbMouseDown (e) {
-        const barWidth = this.$refs.barWrap.clientWidth
-        let percentage = (e.clientX - getElementViewLeft(this.$refs.barWrap)) / barWidth
-        percentage = percentage > 0 ? percentage : 0
-        percentage = percentage < 1 ? percentage : 1
+    onDocumentMouseUp(e) {
+      document.removeEventListener('mouseup', this.onDocumentMouseUp)
+      document.removeEventListener('mousemove', this.onDocumentMouseMove)
 
-        this.$emit('dragbegin', percentage)
-        document.addEventListener('mousemove', this.onDocumentMouseMove)
-        document.addEventListener('mouseup', this.onDocumentMouseUp)
-      },
-      onDocumentMouseMove (e) {
-        const barWidth = this.$refs.barWrap.clientWidth
-        let percentage = (e.clientX - getElementViewLeft(this.$refs.barWrap)) / barWidth
-        percentage = percentage > 0 ? percentage : 0
-        percentage = percentage < 1 ? percentage : 1
-
-        this.$emit('dragging', percentage)
-      },
-      onDocumentMouseUp (e) {
-        document.removeEventListener('mouseup', this.onDocumentMouseUp)
-        document.removeEventListener('mousemove', this.onDocumentMouseMove)
-
-        const barWidth = this.$refs.barWrap.clientWidth
-        let percentage = (e.clientX - getElementViewLeft(this.$refs.barWrap)) / barWidth
-        percentage = percentage > 0 ? percentage : 0
-        percentage = percentage < 1 ? percentage : 1
-        this.$emit('dragend', percentage)
-      },
-      onThumbTouchStart (e) {
-        const barWidth = this.$refs.barWrap.clientWidth
-        let percentage = (e.clientX - getElementViewLeft(this.$refs.barWrap)) / barWidth
-        percentage = percentage > 0 ? percentage : 0
-        percentage = percentage < 1 ? percentage : 1
-
-        this.$emit('dragbegin', percentage)
-        document.addEventListener('touchmove', this.onDocumentTouchMove)
-        document.addEventListener('touchend', this.onDocumentTouchEnd)
-      },
-      onDocumentTouchMove (e) {
-        const touch = e.changedTouches[0]
-        const barWidth = this.$refs.barWrap.clientWidth
-        let percentage = (touch.clientX - getElementViewLeft(this.$refs.barWrap)) / barWidth
-        percentage = percentage > 0 ? percentage : 0
-        percentage = percentage < 1 ? percentage : 1
-
-        this.$emit('dragging', percentage)
-      },
-      onDocumentTouchEnd (e) {
-        document.removeEventListener('touchend', this.onDocumentTouchEnd)
-        document.removeEventListener('touchmove', this.onDocumentTouchMove)
-
-        const touch = e.changedTouches[0]
-        const barWidth = this.$refs.barWrap.clientWidth
-        let percentage = (touch.clientX - getElementViewLeft(this.$refs.barWrap)) / barWidth
-        percentage = percentage > 0 ? percentage : 0
-        percentage = percentage < 1 ? percentage : 1
-        this.$emit('dragend', percentage)
-      },
+      const barWidth = this.$refs.barWrap.clientWidth
+      let percentage = (e.clientX - getElementViewLeft(this.$refs.barWrap)) / barWidth
+      percentage = percentage > 0 ? percentage : 0
+      percentage = percentage < 1 ? percentage : 1
+      this.$emit('dragend', percentage)
     },
-  }
+    onThumbTouchStart(e) {
+      const barWidth = this.$refs.barWrap.clientWidth
+      let percentage = (e.clientX - getElementViewLeft(this.$refs.barWrap)) / barWidth
+      percentage = percentage > 0 ? percentage : 0
+      percentage = percentage < 1 ? percentage : 1
+
+      this.$emit('dragbegin', percentage)
+      document.addEventListener('touchmove', this.onDocumentTouchMove)
+      document.addEventListener('touchend', this.onDocumentTouchEnd)
+    },
+    onDocumentTouchMove(e) {
+      const touch = e.changedTouches[0]
+      const barWidth = this.$refs.barWrap.clientWidth
+      let percentage = (touch.clientX - getElementViewLeft(this.$refs.barWrap)) / barWidth
+      percentage = percentage > 0 ? percentage : 0
+      percentage = percentage < 1 ? percentage : 1
+
+      this.$emit('dragging', percentage)
+    },
+    onDocumentTouchEnd(e) {
+      document.removeEventListener('touchend', this.onDocumentTouchEnd)
+      document.removeEventListener('touchmove', this.onDocumentTouchMove)
+
+      const touch = e.changedTouches[0]
+      const barWidth = this.$refs.barWrap.clientWidth
+      let percentage = (touch.clientX - getElementViewLeft(this.$refs.barWrap)) / barWidth
+      percentage = percentage > 0 ? percentage : 0
+      percentage = percentage < 1 ? percentage : 1
+      this.$emit('dragend', percentage)
+    },
+  },
+}
 </script>
 <style lang="scss">
 
-  .aplayer-bar-wrap {
-    margin: 0 0 0 5px;
-    padding: 4px 0;
-    cursor: pointer;
-    flex: 1;
+.aplayer-bar-wrap {
+  margin: 0 0 0 5px;
+  padding: 4px 0;
+  cursor: pointer;
+  flex: 1;
 
-    .aplayer-bar {
-      position: relative;
+  .aplayer-bar {
+    position: relative;
+    height: 2px;
+    width: 100%;
+    background: #cdcdcd;
+
+    .aplayer-loaded {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      background: #aaa;
       height: 2px;
-      width: 100%;
-      background: #cdcdcd;
+      transition: all 0.5s ease;
 
-      .aplayer-loaded {
+      will-change: width;
+    }
+
+    .aplayer-played {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      height: 2px;
+      transition: background-color .3s;
+      will-change: width;
+
+      .aplayer-thumb {
         position: absolute;
-        left: 0;
         top: 0;
-        bottom: 0;
-        background: #aaa;
-        height: 2px;
-        transition: all 0.5s ease;
+        right: 5px;
+        margin-top: -5px;
+        margin-right: -10px;
+        width: 10px;
+        height: 10px;
+        border: 1px solid;
+        transform: scale(.8);
+        will-change: transform;
+        transition: transform 300ms, background-color .3s, border-color .3s;
+        border-radius: 50%;
+        background: #fff;
+        cursor: pointer;
 
-        will-change: width;
-      }
+        &:hover {
+          transform: scale(1);
+        }
 
-      .aplayer-played {
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        height: 2px;
-        transition: background-color .3s;
-        will-change: width;
+        overflow: hidden;
 
-        .aplayer-thumb {
-          position: absolute;
-          top: 0;
-          right: 5px;
-          margin-top: -5px;
-          margin-right: -10px;
-          width: 10px;
-          height: 10px;
-          border: 1px solid;
-          transform: scale(.8);
-          will-change: transform;
-          transition: transform 300ms, background-color .3s, border-color .3s;
-          border-radius: 50%;
-          background: #fff;
-          cursor: pointer;
+        .aplayer-loading-icon {
+          display: none;
+          width: 100%;
+          height: 100%;
 
-          &:hover {
-            transform: scale(1);
-          }
-
-          overflow: hidden;
-          .aplayer-loading-icon {
-            display: none;
-            width: 100%;
-            height: 100%;
-
-            svg {
-              position: absolute;
-              animation: spin 1s linear infinite;
-              fill: #ffffff;
-            }
+          svg {
+            position: absolute;
+            animation: spin 1s linear infinite;
+            fill: #ffffff;
           }
         }
       }
     }
   }
+}
 
-  .aplayer-loading {
-    .aplayer-bar-wrap .aplayer-bar .aplayer-thumb .aplayer-loading-icon {
-      display: block;
-    }
-
-    .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played .aplayer-thumb {
-      transform: scale(1);
-    }
+.aplayer-loading {
+  .aplayer-bar-wrap .aplayer-bar .aplayer-thumb .aplayer-loading-icon {
+    display: block;
   }
 
-  @keyframes spin {
-    0% {
-      transform: rotate(0)
-    }
-    100% {
-      transform: rotate(360deg)
-    }
+  .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played .aplayer-thumb {
+    transform: scale(1);
   }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0)
+  }
+  100% {
+    transform: rotate(360deg)
+  }
+}
 </style>

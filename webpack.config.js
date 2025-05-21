@@ -1,11 +1,13 @@
-var path = require('path')
-var webpack = require('webpack')
+const path = require('path')
+const webpack = require('webpack')
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
+const VueLoaderPlugin = require("vue-loader/lib/plugin");
 
 module.exports = {
-  entry: './src/vue-aplayer_ui-customizable.vue',
+  entry: './src/vue-aplayer.vue',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'vue-aplayer_ui-customizable.min.js',
+    filename: 'vue-aplayer.min.js',
     library: 'VueAPlayer',
     libraryTarget: 'umd',
     libraryExport: 'default',
@@ -27,48 +29,100 @@ module.exports = {
     },
   },
 
+  optimization: {
+    minimize: true,
+    minimizer: [
+      `...`, // デフォルトの TerserPlugin を維持
+      new CssMinimizerPlugin(),
+    ],
+  },
+
   module: {
     rules: [
       {
         test: /\.(js|vue)$/,
-        loader: 'eslint-loader',
+        use: [{
+          loader: 'eslint-loader',
+          options: {
+            formatter: require('eslint-friendly-formatter'),
+            emitWarning: true,
+          }
+        }],
         enforce: 'pre',
         include: [path.resolve(__dirname, 'src')],
-        options: {
-          formatter: require('eslint-friendly-formatter'),
-          emitWarning: true
-        }
       },
       {
         test: /\.vue$/,
         loader: 'vue-loader',
         options: {
           loaders: {
-            scss: 'vue-style-loader!css-loader?minimize=true!postcss-loader!sass-loader'
-          },
+            scss: [
+              'vue-style-loader',
+              'css-loader',
+              'postcss-loader', // 必要なら
+              'sass-loader'
+            ],
+            sass: [
+              'vue-style-loader',
+              'css-loader',
+              'postcss-loader', // 必要なら
+              {
+                loader: 'sass-loader',
+                options: {
+                  sassOptions: {
+                    indentedSyntax: true
+                  }
+                }
+              }
+            ]
+          }
         }
       },
       {
+        test: /\.css$/,
+        use: [
+          'vue-style-loader',
+          'css-loader',
+          'postcss-loader', // 必要なら
+        ]
+      },
+      {
+        test: /\.scss$/,
+        use: [
+          'vue-style-loader',
+          'css-loader',
+          'postcss-loader', // 必要な場合
+          'sass-loader'
+        ]
+      },
+      {
         test: /\.js$/,
-        loader: 'babel-loader',
+        use: [{
+          loader: 'babel-loader'
+        }],
         exclude: /node_modules/,
       },
       {
         test: /\.(png|jpg)$/,
-        loader: 'url-loader?limit=40000'
+        use: [{
+          loader: 'url-loader',
+          options: {
+            limit: 40000
+          }
+        }],
       },
       {
         test: /\.svg$/,
-        loader: 'svg-inline-loader'
+        use: [{
+          loader: 'svg-inline-loader',
+          options: {}
+        }],
       },
-      {
-        test: /\.html$/,
-        loader: 'vue-html-loader'
-      }
     ]
   },
-  devtool: '#source-map',
+  devtool: 'source-map',
   plugins: [
+    new VueLoaderPlugin(),
     new webpack.DefinePlugin({
       'process.env': {
         NODE_ENV: `"${process.env.NODE_ENV}"`
@@ -76,15 +130,4 @@ module.exports = {
       VERSION: JSON.stringify(require('./package.json').version)
     }),
   ]
-}
-
-if (process.env.NODE_ENV === 'production') {
-  // http://vuejs.github.io/vue-loader/workflow/production.html
-  module.exports.plugins.push(
-    new webpack.optimize.UglifyJsPlugin({
-      compress: {
-        warnings: false
-      },
-    })
-  )
 }
