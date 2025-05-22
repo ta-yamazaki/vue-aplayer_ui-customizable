@@ -11,6 +11,7 @@
         :showPic="false"
         show-lrc
         shuffle
+        cornerRounded
         :showControls='["volume", "shuffle", "repeat", "toggleList"]'
       />
 

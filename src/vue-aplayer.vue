@@ -6,6 +6,7 @@
       'aplayer-withlist' : !mini && list.length > 0,
       'aplayer-withlrc': !mini && (!!$slots.display || showLrc),
       'aplayer-float': isFloatMode,
+      'aplayer-cornerRounded': cornerRounded,
       'aplayer-loading': isPlaying && isLoading
     }"
     :style="floatStyleObj"
@@ -137,6 +138,7 @@ const VueAPlayer = {
     listFolded: {type: Boolean, default: false,},
     float: {type: Boolean, default: false,},
     mini: {type: Boolean, default: false,},
+    cornerRounded: {type: Boolean, default: false,},
 
     autoplay: {type: Boolean, default: false,},
 
@@ -763,6 +765,10 @@ export default VueAPlayer
   audio[controls] {
     display: block;
     width: 100%;
+  }
+
+  &.aplayer-cornerRounded {
+    border-radius: 10px;
   }
 
   // Mini mode
