@@ -6,10 +6,10 @@
       :style="listHeightStyle"
       class="aplayer-list"
     >
-      <ol
-        ref="ol"
-        :style="listHeightStyle"
-      >
+      <ol ref="ol" :style="listHeightStyle">
+        <li v-if="$parent.isMobile">
+          <small style="font-size: 0.65rem; color: gray">※曲をタップして再生</small>
+        </li>
         <li
           v-for="(aMusic, index) of musicList"
           :key="index"
@@ -50,9 +50,14 @@ export default {
   computed: {
     listHeightStyle() {
       return {
-        height: `${33 * this.musicList.length - 1}px`,
+        height: `${33 * this.listLength() - 1}px`,
         maxHeight: this.listmaxheight || ''
       }
+    }
+  },
+  methods: {
+    listLength() {
+      return this.$parent.isMobile ? this.musicList.length + 1 : this.musicList.length
     }
   }
 }
@@ -125,7 +130,12 @@ export default {
       display: flex;
 
       &:first-child {
+        cursor: default;
         border-top: none;
+
+        &:hover {
+          background: transparent;
+        }
       }
 
       &:hover {

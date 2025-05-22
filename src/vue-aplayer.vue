@@ -12,29 +12,21 @@
     :style="floatStyleObj"
   >
     <div class="aplayer-body">
-      <thumbnail
-        v-if="showPic"
-        :pic="currentMusic.pic"
-        :playing="isPlaying"
-        :enable-drag="isFloatMode"
-        :theme="currentTheme"
-        @toggleplay="toggle"
-        @dragbegin="onDragBegin"
-        @dragging="onDragAround"
-      />
-      <no-thumbnail
-        v-if="!showPic"
-        :playing="isPlaying"
-        :enable-drag="isFloatMode"
-        :theme="currentTheme"
-        @toggleplay="toggle"
-        @dragbegin="onDragBegin"
-        @dragging="onDragAround"
-      />
+        <thumbnail
+          v-if="!$parent.isMobile"
+          :showPic="showPic"
+          :pic="currentMusic.pic"
+          :playing="isPlaying"
+          :enable-drag="isFloatMode"
+          :theme="currentTheme"
+          @toggleplay="toggle"
+          @dragbegin="onDragBegin"
+          @dragging="onDragAround"
+        />
       <div class="aplayer-info" v-show="!mini">
         <div class="aplayer-music">
-          <span class="aplayer-title">{{ currentMusic.title || 'Untitled' }}</span>
-          <span class="aplayer-author">{{ currentMusic.artist || 'Unknown' }}</span>
+          <span class="aplayer-title">{{ currentMusic.title }}</span>
+          <span class="aplayer-author">{{ currentMusic.artist }}</span>
         </div>
         <slot name="display" :current-music="currentMusic" :play-stat="playStat">
           <lyrics :current-music="currentMusic" :play-stat="playStat" v-if="showLrc"/>
@@ -74,9 +66,9 @@
 <script type="text/babel">
 import Vue from 'vue'
 import Thumbnail from './components/aplayer-thumbnail.vue'
-import NoThumbnail from './components/aplayer-no-thumbnail.vue'
 import MusicList from './components/aplayer-list.vue'
 import Controls from './components/aplayer-controller.vue'
+import PlayPauseButton from './components/aplayer-playPauseButton.vue'
 import Lyrics from './components/aplayer-lrc.vue'
 import {error, versionCompare, warn} from './utils'
 
@@ -104,8 +96,8 @@ const VueAPlayer = {
   disableVersionBadge: false,
   components: {
     Thumbnail,
-    NoThumbnail,
     Controls,
+    PlayPauseButton,
     MusicList,
     Lyrics,
   },
@@ -749,7 +741,7 @@ export default VueAPlayer
         padding-bottom: 2px;
 
         .aplayer-title {
-          font-size: 14px;
+          font-size: 13px;
         }
 
         .aplayer-author {

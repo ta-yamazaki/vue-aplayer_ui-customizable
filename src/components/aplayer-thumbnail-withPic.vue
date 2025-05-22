@@ -1,11 +1,14 @@
 <template>
   <div
-    :style="currentPicStyleObj"
+    :style="{
+        backgroundImage: `url(${pic})`,
+        backgroundColor: theme
+      }"
     class="aplayer-pic"
     @click="onClick"
     @mousedown="onDragBegin"
   >
-    <div class="aplayer-button">
+    <div :class="playing ? 'aplayer-pause' : 'aplayer-play'" class="aplayer-button">
       <aplayer-play-pause-button
         :playing="playing"
         color="white"
@@ -21,6 +24,7 @@ export default {
     AplayerPlayPauseButton,
   },
   props: {
+    pic: String,
     theme: String,
     playing: {
       type: Boolean,
@@ -39,11 +43,6 @@ export default {
     }
   },
   computed: {
-    currentPicStyleObj() {
-      return {
-        backgroundColor: this.theme
-      }
-    },
   },
   methods: {
     onDragBegin(e) {
@@ -67,9 +66,8 @@ export default {
       this.$emit('dragend')
     },
     onClick() {
-      if (!this.hasMovedSinceMouseDown) {
+      if (!this.hasMovedSinceMouseDown)
         this.$emit('toggleplay')
-      }
     }
   }
 }
@@ -95,24 +93,57 @@ export default {
   transition: all 0.3s ease;
   cursor: pointer;
 
+  &:hover {
+    .aplayer-button {
+      opacity: 1;
+    }
+  }
+
   .aplayer-button {
     position: absolute;
     border-radius: 50%;
+    opacity: 0.8;
     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
     background: rgba(0, 0, 0, 0.2);
+    transition: all 0.1s ease;
 
-    width: 58px;
-    height: 58px;
+    .aplayer-fill {
+      fill: #fff;
+    }
+  }
+
+  .aplayer-play {
+    width: 26px;
+    height: 26px;
     border: 2px solid #fff;
-    top: 50%;
-    left: 50%;
-    /* 要素の中央を基準にするために自分の幅・高さの半分だけ戻す */
-    transform: translate(-50%, -50%);
-    //bottom: 50%;
-    //right: 50%;
-    //margin: 0 -15px -15px 0;
+    bottom: 50%;
+    right: 50%;
+    margin: 0 -15px -15px 0;
 
+    .aplayer-icon-play {
+      position: absolute;
+      top: 3px;
+      left: 4px;
+      height: 20px;
+      width: 20px;
+    }
+  }
+
+  .aplayer-pause {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #fff;
+    bottom: 4px;
+    right: 4px;
+
+    .aplayer-icon-pause {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      height: 12px;
+      width: 12px;
+    }
   }
 }
 

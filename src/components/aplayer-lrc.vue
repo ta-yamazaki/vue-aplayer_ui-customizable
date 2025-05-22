@@ -48,8 +48,8 @@ export default {
     transformStyle() {
       // transform: translateY(0); -webkit-transform: translateY(0);
       return {
-        transform: `translateY(${-this.currentLineIndex * 16 + 32}px)`,
-        webkitTransform: `translateY(${-this.currentLineIndex * 16 + 32}px)`,
+        transform: `translateY(${-this.currentLineIndex * 16 + 24}px)`,
+        webkitTransform: `translateY(${-this.currentLineIndex * 16 + 24}px)`,
       }
     },
   },
@@ -102,9 +102,10 @@ export default {
 .aplayer-lrc {
   position: relative;
   height: $lrc-height;
-  text-align: center;
+  text-align: left;
   overflow: hidden;
   margin-bottom: 7px;
+  padding: 0 1rem;
 
   &:before {
     position: absolute;
