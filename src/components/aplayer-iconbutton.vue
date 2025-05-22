@@ -1,6 +1,7 @@
 <template>
   <button
     class="aplayer-icon"
+    :style="{width: large ? '19px' : '15px', height: large ? '19px' : '15px'}"
     type="button"
   >
     <icon :type="icon" :color="color"/>
@@ -20,6 +21,10 @@ export default {
       type: String,
       default: "black",
     },
+    large: {
+      type: Boolean,
+      default: false,
+    },
   },
 }
 </script>
@@ -27,8 +32,6 @@ export default {
 
 <style lang="scss">
 .aplayer-icon {
-  width: 15px;
-  height: 15px;
   border: none;
   background-color: transparent;
   outline: none;

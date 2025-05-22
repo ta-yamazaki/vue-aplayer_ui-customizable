@@ -6,20 +6,19 @@
     @mousedown="onDragBegin"
   >
     <div :class="playing ? 'aplayer-pause' : 'aplayer-play'" class="aplayer-button">
-      <icon-button
-        :class="playing ? 'aplayer-icon-pause' : 'aplayer-icon-play'"
-        :icon="playing ? 'pause' : 'play'"
+      <aplayer-play-pause-button
+        :playing="playing"
         color="white"
       />
     </div>
   </div>
 </template>
 <script>
-import IconButton from './aplayer-iconbutton.vue'
+import AplayerPlayPauseButton from "./aplayer-playPauseButton.vue";
 
 export default {
   components: {
-    IconButton,
+    AplayerPlayPauseButton,
   },
   props: {
     pic: String,

@@ -47,6 +47,7 @@
           :muted="isAudioMuted"
           :theme="currentTheme"
           :showControls="showControls"
+          :large="largeControls"
           @toggleshuffle="shouldShuffle = !shouldShuffle"
           @togglelist="showList = !showList"
           @togglemute="toggleMute"
@@ -133,6 +134,7 @@ const VueAPlayer = {
     showPic: {type: Boolean, default: true,},
     showLrc: {type: Boolean, default: false,},
     showControls: {type: Array, default: ["volume", "shuffle", "repeat", "toggleList"],},
+    largeControls: {type: Boolean, default: false,},
 
     listMaxHeight: String,
     listFolded: {type: Boolean, default: false,},

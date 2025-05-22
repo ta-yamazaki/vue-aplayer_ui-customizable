@@ -5,6 +5,7 @@
       :icon="volumeIcon"
       :color="darkThemeColor"
       @click.native="$emit('togglemute')"
+      large
     />
     <div
       class="aplayer-volume-bar-wrap"
@@ -35,7 +36,7 @@ export default {
   components: {
     IconButton,
   },
-  props: ['volume', 'muted', 'theme'],
+  props: ['volume', 'muted', 'theme', "large"],
   computed: {
     volumeIcon() {
       if (this.muted || this.volume <= 0) return 'volume-off'

@@ -6,20 +6,19 @@
     @mousedown="onDragBegin"
   >
     <div class="aplayer-button">
-      <icon-button
-        :class="playing ? 'aplayer-icon-pause' : 'aplayer-icon-play'"
-        :icon="playing ? 'pause' : 'play'"
+      <aplayer-play-pause-button
+        :playing="playing"
         color="white"
       />
     </div>
   </div>
 </template>
 <script>
-import IconButton from './aplayer-iconbutton.vue'
+import AplayerPlayPauseButton from "./aplayer-playPauseButton.vue";
 
 export default {
   components: {
-    IconButton,
+    AplayerPlayPauseButton,
   },
   props: {
     theme: String,
@@ -114,24 +113,6 @@ export default {
     //right: 50%;
     //margin: 0 -15px -15px 0;
 
-    .aplayer-icon-play {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      padding-left: 5px;
-      transform: translate(-50%, -50%);
-      height: 70%;
-      width: 70%;
-    }
-
-    .aplayer-icon-pause {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      height: 50%;
-      width: 50%;
-    }
   }
 }
 

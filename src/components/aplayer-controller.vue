@@ -4,11 +4,13 @@
       :loadProgress="loadProgress"
       :playProgress="playProgress"
       :theme="theme"
+      large
       @dragbegin="val => $emit('dragbegin', val)"
       @dragend="val => $emit('dragend', val)"
       @dragging="val => $emit('dragging', val)"
     />
-    <div class="aplayer-time">
+    <div class="aplayer-time"
+         :style="{fontSize: aplayerTimeFontSize}">
       <div class="aplayer-time-inner">
         <span class="aplayer-ptime"
         >{{ secondToTime(stat.playedTime) }}</span> / <span
@@ -19,6 +21,7 @@
         :muted="muted"
         :theme="theme"
         :volume="volume"
+        large
         @setvolume="v => $emit('setvolume', v)"
         @togglemute="$emit('togglemute')"
       />
@@ -29,6 +32,7 @@
         icon="shuffle"
         :color="darkThemeColor"
         @click.native="$emit('toggleshuffle')"
+        large
       />
       <icon-button
         v-if="showControls.includes('repeat')"
@@ -37,6 +41,7 @@
         :icon="repeat === 'repeat-one' ? 'repeat-one' : 'repeat-all'"
         :color="darkThemeColor"
         @click.native="$emit('nextmode')"
+        large
       />
       <icon-button
         v-if="showControls.includes('toggleList')"
@@ -44,6 +49,7 @@
         :icon="$parent.showList ? 'arrow-up' : 'arrow-down'"
         :color="darkThemeColor"
         @click.native="$emit('togglelist')"
+        large
       />
     </div>
   </div>
@@ -61,7 +67,7 @@ export default {
     VProgress,
     Volume,
   },
-  props: ['shuffle', 'repeat', 'stat', 'theme', 'volume', 'muted', 'showControls'],
+  props: ['shuffle', 'repeat', 'stat', 'theme', 'volume', 'muted', 'showControls', 'large'],
   computed: {
     loadProgress() {
       if (this.stat.duration === 0) return 0
@@ -73,6 +79,9 @@ export default {
     },
     darkThemeColor() {
       return darkenColor(this.theme)
+    },
+    aplayerTimeFontSize() {
+      return this.large ? "14px" : "11px"
     },
   },
   methods: {

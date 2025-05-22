@@ -1,29 +1,25 @@
 <template>
-  <div
-    ref="barWrap"
-    class="aplayer-bar-wrap"
-    @mousedown="onThumbMouseDown"
-    @touchstart="onThumbTouchStart"
-  >
-    <div class="aplayer-bar">
-      <div
-        :style="{width: `${loadProgress * 100}%`}"
-        class="aplayer-loaded">
-      </div>
-      <div
-        :style="{width: `${playProgress * 100}%`, background: theme}"
-        class="aplayer-played"
-      >
-        <span
-          ref="thumb"
-          :style="{borderColor:　theme, backgroundColor: thumbHovered ? theme : '#fff'}"
-          class="aplayer-thumb"
-          @mouseout="thumbHovered = false"
-          @mouseover="thumbHovered = true"
-        >
+  <div ref="barWrap"
+       class="aplayer-bar-wrap"
+       @mousedown="onThumbMouseDown"
+       @touchstart="onThumbTouchStart">
+    <div class="aplayer-bar"
+         :style="{height: barHeight}">
+      <div :style="{width: `${loadProgress * 100}%`, height: barHeight}"
+           class="aplayer-loaded"></div>
+      <div :style="{width: `${playProgress * 100}%`, background: theme, height: barHeight}"
+           class="aplayer-played">
+        <span ref="thumb"
+              :style="{
+          borderColor:　theme,
+           backgroundColor: thumbHovered ? theme : '#fff',
+           marginTop: thumbMarginTop
+        }"
+              class="aplayer-thumb"
+              @mouseout="thumbHovered = false"
+              @mouseover="thumbHovered = true">
           <span :style="{backgroundColor: theme }"
-                class="aplayer-loading-icon"
-          >
+                class="aplayer-loading-icon">
             <icon type="loading"/>
           </span>
         </span>
@@ -40,11 +36,36 @@ export default {
   components: {
     Icon
   },
-  props: ['loadProgress', 'playProgress', 'theme'],
+  props: {
+    loadProgress: {
+      type: Number,
+      required: true
+    },
+    playProgress: {
+      type: Number,
+      required: true
+    },
+    theme: {
+      type: String,
+      required: true
+    },
+    large: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       thumbHovered: false,
     }
+  },
+  computed: {
+    barHeight() {
+      return this.large ? "8px" : "4px";
+    },
+    thumbMarginTop() {
+      return this.large ? "-2px" : "-5px";
+    },
   },
   methods: {
     onThumbMouseDown(e) {
@@ -118,7 +139,6 @@ export default {
 
   .aplayer-bar {
     position: relative;
-    height: 2px;
     width: 100%;
     background: #cdcdcd;
 
@@ -128,7 +148,6 @@ export default {
       top: 0;
       bottom: 0;
       background: #aaa;
-      height: 2px;
       transition: all 0.5s ease;
 
       will-change: width;
@@ -139,7 +158,6 @@ export default {
       left: 0;
       top: 0;
       bottom: 0;
-      height: 2px;
       transition: background-color .3s;
       will-change: width;
 
@@ -147,7 +165,6 @@ export default {
         position: absolute;
         top: 0;
         right: 5px;
-        margin-top: -5px;
         margin-right: -10px;
         width: 10px;
         height: 10px;
@@ -169,18 +186,22 @@ export default {
           display: none;
           width: 100%;
           height: 100%;
-
-          svg {
-            position: absolute;
-            animation: spin 1s linear infinite;
-            fill: #ffffff;
-          }
         }
       }
     }
   }
 }
 
+@keyframes spin {
+  0% {
+    transform: rotate(0)
+  }
+  100% {
+    transform: rotate(360deg)
+  }
+}
+</style>
+<style lang="scss">
 .aplayer-loading {
   .aplayer-bar-wrap .aplayer-bar .aplayer-thumb .aplayer-loading-icon {
     display: block;
@@ -191,12 +212,12 @@ export default {
   }
 }
 
-@keyframes spin {
-  0% {
-    transform: rotate(0)
-  }
-  100% {
-    transform: rotate(360deg)
+
+.aplayer-loading-icon {
+  svg {
+    position: absolute;
+    animation: spin 1s linear infinite;
+    fill: #ffffff;
   }
 }
 </style>
