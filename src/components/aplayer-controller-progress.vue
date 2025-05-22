@@ -108,7 +108,7 @@ export default {
   },
 }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 
 .aplayer-bar-wrap {
   margin: 0 0 0 5px;

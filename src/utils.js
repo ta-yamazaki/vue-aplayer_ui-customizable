@@ -74,6 +74,10 @@ export function warn (message) {
   return console.warn(`[Vue-APlayer] ${message}`)
 }
 
+export function error (message) {
+  return console.error(`[Vue-APlayer] ${message}`)
+}
+
 export function deprecatedProp (name, sinceVersion, alternative) {
   return warn(`'${name}' is deprecated since v${sinceVersion}, and will be removed in future releases, use '${alternative}' instead`)
 }

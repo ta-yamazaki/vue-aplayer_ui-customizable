@@ -1,8 +1,9 @@
 <template>
   <div class="aplayer-volume-wrap">
     <icon-button
-      :class="`aplayer-icon-${volumeIcon}`"
+      class="aplayer-icon-volume"
       :icon="volumeIcon"
+      :color="darkThemeColor"
       @click.native="$emit('togglemute')"
     />
     <div
@@ -24,6 +25,7 @@
 </template>
 
 <script>
+import {darkenColor} from '../colorUtils'
 import IconButton from './aplayer-iconbutton.vue'
 import {getElementViewTop} from '../utils'
 
@@ -37,8 +39,12 @@ export default {
   computed: {
     volumeIcon() {
       if (this.muted || this.volume <= 0) return 'volume-off'
-      if (this.volume >= 1) return 'volume-up'
-      return 'volume-down'
+      if (this.volume < 0.5) return 'volume-low'
+      if (this.volume < 1) return 'volume-medium'
+      return 'volume-high'
+    },
+    darkThemeColor() {
+      return darkenColor(this.theme)
     },
   },
   methods: {
@@ -71,7 +77,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 
 .aplayer-volume-wrap {
   position: relative;

@@ -3,7 +3,7 @@
     class="aplayer-icon"
     type="button"
   >
-    <icon :type="icon"/>
+    <icon :type="icon" :color="color"/>
   </button>
 </template>
 
@@ -14,7 +14,13 @@ export default {
   components: {
     Icon,
   },
-  props: ['icon'],
+  props: {
+    icon: String,
+    color: {
+      type: String,
+      default: "black",
+    },
+  },
 }
 </script>
 

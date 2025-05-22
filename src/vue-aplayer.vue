@@ -3,7 +3,7 @@
     class="aplayer"
     :class="{
       'aplayer-mini': mini,
-      'aplayer-withlist' : !mini && musicList.length > 0,
+      'aplayer-withlist' : !mini && list.length > 0,
       'aplayer-withlrc': !mini && (!!$slots.display || showLrc),
       'aplayer-float': isFloatMode,
       'aplayer-loading': isPlaying && isLoading
@@ -12,7 +12,17 @@
   >
     <div class="aplayer-body">
       <thumbnail
+        v-if="showPic"
         :pic="currentMusic.pic"
+        :playing="isPlaying"
+        :enable-drag="isFloatMode"
+        :theme="currentTheme"
+        @toggleplay="toggle"
+        @dragbegin="onDragBegin"
+        @dragging="onDragAround"
+      />
+      <no-thumbnail
+        v-if="!showPic"
         :playing="isPlaying"
         :enable-drag="isFloatMode"
         :theme="currentTheme"
@@ -35,6 +45,7 @@
           :volume="audioVolume"
           :muted="isAudioMuted"
           :theme="currentTheme"
+          :showControls="showControls"
           @toggleshuffle="shouldShuffle = !shouldShuffle"
           @togglelist="showList = !showList"
           @togglemute="toggleMute"
@@ -50,7 +61,7 @@
     <music-list
       :show="showList && !mini"
       :current-music="currentMusic"
-      :music-list="musicList"
+      :music-list="list"
       :play-index="playIndex"
       :listmaxheight="listMaxHeight"
       :theme="currentTheme"
@@ -61,10 +72,11 @@
 <script type="text/babel">
 import Vue from 'vue'
 import Thumbnail from './components/aplayer-thumbnail.vue'
+import NoThumbnail from './components/aplayer-no-thumbnail.vue'
 import MusicList from './components/aplayer-list.vue'
 import Controls from './components/aplayer-controller.vue'
 import Lyrics from './components/aplayer-lrc.vue'
-import {versionCompare, warn} from './utils'
+import {error, versionCompare, warn} from './utils'
 
 let versionBadgePrinted = false
 const canUseSync = versionCompare(Vue.version, '2.3.0') >= 0
@@ -80,9 +92,6 @@ let activeMutex = null
 
 
 const REPEAT = {
-  NONE: 'none',
-  MUSIC: 'music',
-  LIST: 'list',
   NO_REPEAT: 'no-repeat',
   REPEAT_ONE: 'repeat-one',
   REPEAT_ALL: 'repeat-all',
@@ -93,136 +102,59 @@ const VueAPlayer = {
   disableVersionBadge: false,
   components: {
     Thumbnail,
+    NoThumbnail,
     Controls,
     MusicList,
     Lyrics,
   },
   props: {
-    music: {
-      type: Object,
-      required: true,
-      validator(song) {
-        return !!song.src
-      },
-    },
     list: {
       type: Array,
-      default() {
-        return []
+      required: true,
+      validator: (songs) => {
+        if (songs.length === 0) {
+          error("'list' property must have at least one song.")
+          return false;
+        }
+
+        songs.forEach((song) => {
+          if (!song.src) {
+            error("'src' property is required.\nSong title is : " + song.title)
+            return false;
+          }
+        })
+
+        return true;
       },
     },
-    mini: {
-      type: Boolean,
-      default: false,
-    },
-    showLrc: {
-      type: Boolean,
-      default: false,
-    },
-    mutex: {
-      type: Boolean,
-      default: true,
-    },
-    theme: {
-      type: String,
-      default: '#41b883',
-    },
+    mutex: {type: Boolean, default: true,},
+    theme: {type: String, default: '#41b883',},
+    showPic: {type: Boolean, default: true,},
+    showLrc: {type: Boolean, default: false,},
+    showControls: {type: Array, default: ["volume", "shuffle", "repeat", "toggleList"],},
 
     listMaxHeight: String,
-    /**
-     * @since 1.4.1
-     * Fold playlist initially
-     */
-    listFolded: {
-      type: Boolean,
-      default: false,
-    },
+    listFolded: {type: Boolean, default: false,},
+    float: {type: Boolean, default: false,},
+    mini: {type: Boolean, default: false,},
 
-    /**
-     * @since 1.2.0 Float mode
-     */
-    float: {
-      type: Boolean,
-      default: false,
-    },
+    autoplay: {type: Boolean, default: false,},
 
-    // Audio attributes as props
-    // since 1.4.0
-    // autoplay controls muted preload volume
-    // autoplay is not observable
-
-    /**
-     * @since 1.4.0
-     * not observable
-     */
-    autoplay: {
-      type: Boolean,
-      default: false,
-    },
-
-    /**
-     * @since 1.4.0
-     * whether to show native audio controls below Vue-APlayer
-     * only work in development environment and not mini mode
-     *
-     * observable
-     */
-    controls: {
-      type: Boolean,
-      default: false,
-    },
-
-    /**
-     * @since 1.4.0
-     * observable, sync
-     */
-    muted: {
-      type: Boolean,
-      default: false,
-    },
-    /**
-     * @since 1.4.0
-     * observable
-     */
-    preload: String,
-
-    /**
-     * @since 1.4.0
-     * observable, sync
-     */
+    controls: {type: Boolean, default: false,},
+    muted: {type: Boolean, default: false,},
     volume: {
       type: Number,
-      default: 0.8,
-      validator(value) {
-        return value >= 0 && value <= 1
-      },
+      default: 1,
+      validator: (value) => value >= 0 && value <= 1,
     },
+    shuffle: {type: Boolean, default: false,},
+    repeat: {type: String, default: REPEAT.NO_REPEAT,},
 
-    // play order control
-    // since 1.5.0
-
-    /**
-     * @since 1.5.0
-     * @see https://support.apple.com/en-us/HT207230
-     * twoWay
-     */
-    shuffle: {
-      type: Boolean,
-      default: false,
-    },
-    /**
-     * @since 1.5.0
-     * @see https://support.apple.com/en-us/HT207230
-     * twoWay
-     */
-    repeat: {
-      type: String,
-      default: REPEAT.NO_REPEAT,
-    },
+    preload: String,
   },
   data() {
     return {
-      internalMusic: this.music,
+      internalMusic: this.list[0],
       isPlaying: false,
       isSeeking: false,
       wasPlayingBeforeSeeking: false,
@@ -295,17 +227,8 @@ const VueAPlayer = {
     isFloatMode() {
       return this.float && !this.isMobile
     },
-    shouldAutoplay() {
-      if (this.isMobile) return false
-      return this.autoplay
-    },
-    musicList() {
-      return this.list
-    },
     shouldShowNativeControls() {
-      return process.env.NODE_ENV !== 'production' &&
-        this.controls &&
-        !this.mini
+      return process.env.NODE_ENV !== 'production' && this.controls && !this.mini
     },
 
     // useful
@@ -316,14 +239,6 @@ const VueAPlayer = {
         transform: `translate(${this.floatOffsetLeft}px, ${this.floatOffsetTop}px)`,
         webkitTransform: `translate(${this.floatOffsetLeft}px, ${this.floatOffsetTop}px)`,
       }
-    },
-    currentPicStyleObj() {
-      if (this.currentMusic && this.currentMusic.pic) {
-        return {
-          backgroundImage: `url(${this.currentMusic.pic})`,
-        }
-      }
-      return {}
     },
     loadProgress() {
       if (this.playStat.duration === 0) return 0
@@ -338,6 +253,8 @@ const VueAPlayer = {
         return this.shuffledList.indexOf(this.currentMusic)
       },
       set(val) {
+        console.log("set(val)")
+        console.log(val)
         this.currentMusic = this.shuffledList[val % this.shuffledList.length]
       },
     },
@@ -381,16 +298,7 @@ const VueAPlayer = {
     },
     repeatMode: {
       get() {
-        switch (this.internalRepeat) {
-          case REPEAT.NONE:
-          case REPEAT.NO_REPEAT:
-            return REPEAT.NO_REPEAT
-          case REPEAT.MUSIC:
-          case REPEAT.REPEAT_ONE:
-            return REPEAT.REPEAT_ONE
-          default:
-            return REPEAT.REPEAT_ALL
-        }
+        return this.internalRepeat
       },
       set(val) {
         canUseSync && this.$emit('update:repeat', val)
@@ -413,18 +321,17 @@ const VueAPlayer = {
     // functions
 
     setNextMode() {
-      if (this.repeatMode === REPEAT.REPEAT_ALL) {
-        this.repeatMode = REPEAT.REPEAT_ONE
-      } else if (this.repeatMode === REPEAT.REPEAT_ONE) {
-        this.repeatMode = REPEAT.NO_REPEAT
-      } else {
-        this.repeatMode = REPEAT.REPEAT_ALL
+      switch (this.repeatMode) {
+        case REPEAT.REPEAT_ALL:
+          return this.repeatMode = REPEAT.REPEAT_ONE;
+        case REPEAT.REPEAT_ONE:
+          return this.repeatMode = REPEAT.NO_REPEAT;
+        default:
+          this.repeatMode = REPEAT.REPEAT_ALL
       }
     },
     thenPlay() {
-      this.$nextTick(() => {
-        this.play()
-      })
+      this.$nextTick(() => this.play())
     },
 
     // controls
@@ -432,41 +339,31 @@ const VueAPlayer = {
     // play/pause
 
     toggle() {
-      if (!this.audio.paused) {
-        this.pause()
-      } else {
-        this.play()
-      }
+      this.audio.paused ? this.play() : this.pause()
     },
     play() {
-      if (this.mutex) {
-        if (activeMutex && activeMutex !== this) {
-          activeMutex.pause()
-        }
-        activeMutex = this
-      }
+      this.executeMutex()
+
       // handle .play() Promise
       const audioPlayPromise = this.audio.play()
-      if (audioPlayPromise) {
-        return this.audioPlayPromise = new Promise((resolve, reject) => {
-          // rejectPlayPromise is to force reject audioPlayPromise if it's still pending when pause() is called
-          this.rejectPlayPromise = reject
-          audioPlayPromise.then((res) => {
+      if (!audioPlayPromise) return;
+
+      this.audioPlayPromise = new Promise((resolve, reject) => {
+        // rejectPlayPromise is to force reject audioPlayPromise if it's still pending when pause() is called
+        this.rejectPlayPromise = reject
+        audioPlayPromise
+          .then((res) => {
             this.rejectPlayPromise = null
             resolve(res)
-          }).catch(warn)
-        })
-      }
+          })
+          .catch(warn)
+      })
     },
     pause() {
       this.audioPlayPromise
-        .then(() => {
-          this.audio.pause()
-        })
+        .then(() => this.audio.pause())
         // Avoid force rejection throws Uncaught
-        .catch(() => {
-          this.audio.pause()
-        })
+        .catch(() => this.audio.pause())
 
       // audioPlayPromise is still pending
       if (this.rejectPlayPromise) {
@@ -476,31 +373,37 @@ const VueAPlayer = {
       }
     },
 
+    executeMutex() {
+      if (!this.mutex) return;
+
+      if (activeMutex && activeMutex !== this) {
+        activeMutex.pause()
+      }
+      activeMutex = this
+    },
+
     // progress bar
 
-    onProgressDragBegin(val) {
+    onProgressDragBegin(percent) {
       this.wasPlayingBeforeSeeking = this.isPlaying
       this.pause()
       this.isSeeking = true
 
       // handle load failures
-      if (!isNaN(this.audio.duration)) {
-        this.audio.currentTime = this.audio.duration * val
-      }
+      this.setCurrentTimeFromDuration(percent)
     },
-    onProgressDragging(val) {
-      if (isNaN(this.audio.duration)) {
-        this.playStat.playedTime = 0
-      } else {
-        this.audio.currentTime = this.audio.duration * val
-      }
+    onProgressDragging(percent) {
+      if (isNaN(this.audio.duration)) this.playStat.playedTime = 0
+      this.setCurrentTimeFromDuration(percent)
+    },
+    setCurrentTimeFromDuration(percent) {
+      if (isNaN(this.audio.duration)) return
+      this.audio.currentTime = this.audio.duration * percent
     },
     onProgressDragEnd(val) {
       this.isSeeking = false
 
-      if (this.wasPlayingBeforeSeeking) {
-        this.thenPlay()
-      }
+      if (this.wasPlayingBeforeSeeking) this.thenPlay()
     },
 
     // volume
@@ -513,30 +416,20 @@ const VueAPlayer = {
     },
     setAudioVolume(val) {
       this.audio.volume = val
-      if (val > 0) {
-        this.setAudioMuted(false)
-      }
+      if (val > 0) this.setAudioMuted(false)
     },
 
     // playlist
 
     getShuffledList() {
-      if (!this.list.length) {
-        return [this.internalMusic]
-      }
       let unshuffled = [...this.list]
-      if (!this.internalShuffle || unshuffled.length <= 1) {
-        return unshuffled
-      }
 
-      let indexOfCurrentMusic = unshuffled.indexOf(this.internalMusic)
-      if (unshuffled.length === 2 && indexOfCurrentMusic !== -1) {
-        if (indexOfCurrentMusic === 0) {
-          return unshuffled
-        } else {
-          return [this.internalMusic, unshuffled[0]]
-        }
-      }
+      if (!this.shouldShuffle || unshuffled.length === 1)
+        return unshuffled
+
+      if (unshuffled.length === 2)
+        return [unshuffled[1], unshuffled[0]]
+
       // shuffle list
       // @see https://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array
       for (let i = unshuffled.length - 1; i > 0; i--) {
@@ -547,12 +440,9 @@ const VueAPlayer = {
       }
 
       // take currentMusic to first
-      if (indexOfCurrentMusic !== -1) {
-        indexOfCurrentMusic = unshuffled.indexOf(this.internalMusic)
-        if (indexOfCurrentMusic !== 0) {
-          [unshuffled[0], unshuffled[indexOfCurrentMusic]] = [unshuffled[indexOfCurrentMusic], unshuffled[0]]
-        }
-      }
+      let indexOfCurrentMusic = unshuffled.indexOf(this.internalMusic)
+      if (indexOfCurrentMusic !== 0)
+        [unshuffled[0], unshuffled[indexOfCurrentMusic]] = [unshuffled[indexOfCurrentMusic], unshuffled[0]]
 
       return unshuffled
     },
@@ -560,10 +450,11 @@ const VueAPlayer = {
     onSelectSong(song) {
       if (this.currentMusic === song) {
         this.toggle()
-      } else {
-        this.currentMusic = song
-        this.thenPlay()
+        return
       }
+
+      this.currentMusic = song
+      this.thenPlay()
     },
 
     // event handlers
@@ -582,16 +473,16 @@ const VueAPlayer = {
       this.isLoading = false
     },
     onAudioDurationChange() {
-      if (this.audio.duration !== 1) {
+      if (this.audio.duration !== 1)
         this.playStat.duration = this.audio.duration
-      }
     },
     onAudioProgress() {
-      if (this.audio.buffered.length) {
-        this.playStat.loadedTime = this.audio.buffered.end(this.audio.buffered.length - 1)
-      } else {
+      if (this.audio.buffered.length === 0) {
         this.playStat.loadedTime = 0
+        return
       }
+
+      this.playStat.loadedTime = this.audio.buffered.end(this.audio.buffered.length - 1)
     },
     onAudioTimeUpdate() {
       this.playStat.playedTime = this.audio.currentTime
@@ -608,22 +499,23 @@ const VueAPlayer = {
     },
     onAudioEnded() {
       // determine next song according to shuffle and repeat
-      if (this.repeatMode === REPEAT.REPEAT_ALL) {
-        if (this.shouldShuffle && this.playIndex === this.shuffledList.length - 1) {
-          this.shuffledList = this.getShuffledList()
-        }
-        this.playIndex++
+
+      if (this.repeatMode === REPEAT.REPEAT_ONE) {
         this.thenPlay()
-      } else if (this.repeatMode === REPEAT.REPEAT_ONE) {
-        this.thenPlay()
-      } else {
-        this.playIndex++
-        if (this.playIndex !== 0) {
-          this.thenPlay()
-        } else if (this.shuffledList.length === 1) {
-          this.audio.currentTime = 0
-        }
+        return
       }
+
+      if (this.repeatMode === REPEAT.REPEAT_ALL) {
+        // After playing to the end of shuffledList, update shuffledList.
+        if (this.shouldShuffle && this.playIndex === this.shuffledList.length - 1)
+          this.shuffledList = this.getShuffledList()
+
+        this.playIndex++
+        this.thenPlay()
+        return;
+      }
+
+      // no-repeat no action
     },
 
     initAudio() {
@@ -676,30 +568,33 @@ const VueAPlayer = {
       this.audio.addEventListener('ended', this.onAudioEnded)
 
 
-      if (this.currentMusic) {
+      if (this.currentMusic)
         this.audio.src = this.currentMusic.src
-      }
     },
 
     setSelfAdaptingTheme() {
       // auto theme according to current music cover image
-      if ((this.currentMusic.theme || this.theme) === 'pic') {
-        const pic = this.currentMusic.pic
-        // use cache
-        if (picThemeCache[pic]) {
-          this.selfAdaptingTheme = picThemeCache[pic]
-        } else {
-          try {
-            new ColorThief().getColorAsync(pic, ([r, g, b]) => {
-              picThemeCache[pic] = `rgb(${r}, ${g}, ${b})`
-              this.selfAdaptingTheme = `rgb(${r}, ${g}, ${b})`
-            })
-          } catch (e) {
-            warn('color-thief is required to support self-adapting theme')
-          }
-        }
-      } else {
+
+      if ((this.currentMusic.theme || this.theme) !== 'pic') {
         this.selfAdaptingTheme = null
+        return
+      }
+
+      const pic = this.currentMusic.pic
+
+      // use cache
+      if (picThemeCache[pic]) {
+        this.selfAdaptingTheme = picThemeCache[pic]
+        return
+      }
+
+      try {
+        new ColorThief().getColorAsync(pic, ([r, g, b]) => {
+          picThemeCache[pic] = `rgb(${r}, ${g}, ${b})`
+          this.selfAdaptingTheme = `rgb(${r}, ${g}, ${b})`
+        })
+      } catch (e) {
+        warn('color-thief is required to support self-adapting theme')
       }
     },
   },
@@ -714,32 +609,31 @@ const VueAPlayer = {
         this.setSelfAdaptingTheme()
 
         const src = music.src
+        if (!/\.m3u8(?=(#|\?|$))/.test(src)) {
+          this.audio.src = src
+          return
+        }
+
         // HLS support
-        if (/\.m3u8(?=(#|\?|$))/.test(src)) {
-          if (this.audio.canPlayType('application/x-mpegURL') || this.audio.canPlayType('application/vnd.apple.mpegURL')) {
-            this.audio.src = src
+        if (this.audio.canPlayType('application/x-mpegURL') || this.audio.canPlayType('application/vnd.apple.mpegURL')) {
+          this.audio.src = src
+          return
+        }
+
+        try {
+          const Hls = require('hls.js')
+          if (Hls.isSupported()) {
+            if (!this.hls) this.hls = new Hls()
+            this.hls.loadSource(src)
+            this.hls.attachMedia(this.audio)
           } else {
-            try {
-              const Hls = require('hls.js')
-              if (Hls.isSupported()) {
-                if (!this.hls) {
-                  this.hls = new Hls()
-                }
-                this.hls.loadSource(src)
-                this.hls.attachMedia(this.audio)
-              } else {
-                warn('HLS is not supported on your browser')
-                this.audio.src = src
-              }
-            } catch (e) {
-              warn('hls.js is required to support m3u8')
-              this.audio.src = src
-            }
+            warn('HLS is not supported on your browser')
+            this.audio.src = src
           }
-        } else {
+        } catch (e) {
+          warn('hls.js is required to support m3u8')
           this.audio.src = src
         }
-        // self-adapting theme color
       },
     },
 
@@ -768,7 +662,6 @@ const VueAPlayer = {
       this.internalVolume = val
     },
 
-
     // sync shuffle, repeat
     shuffle(val) {
       this.internalShuffle = val
@@ -793,12 +686,8 @@ const VueAPlayer = {
     if (this.autoplay) this.play()
   },
   beforeDestroy() {
-    if (activeMutex === this) {
-      activeMutex = null
-    }
-    if (this.hls) {
-      this.hls.destroy()
-    }
+    if (activeMutex === this) activeMutex = null
+    if (this.hls) this.hls.destroy()
   },
 }
 
@@ -806,7 +695,7 @@ export default VueAPlayer
 
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import "./scss/variables";
 
 .aplayer {

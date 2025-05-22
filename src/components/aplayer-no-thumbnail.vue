@@ -5,7 +5,7 @@
     @click="onClick"
     @mousedown="onDragBegin"
   >
-    <div :class="playing ? 'aplayer-pause' : 'aplayer-play'" class="aplayer-button">
+    <div class="aplayer-button">
       <icon-button
         :class="playing ? 'aplayer-icon-pause' : 'aplayer-icon-play'"
         :icon="playing ? 'pause' : 'play'"
@@ -22,7 +22,6 @@ export default {
     IconButton,
   },
   props: {
-    pic: String,
     theme: String,
     playing: {
       type: Boolean,
@@ -42,9 +41,7 @@ export default {
   },
   computed: {
     currentPicStyleObj() {
-      if (!this.pic) return {}
       return {
-        backgroundImage: `url(${this.pic})`,
         backgroundColor: this.theme
       }
     },
@@ -99,56 +96,41 @@ export default {
   transition: all 0.3s ease;
   cursor: pointer;
 
-  &:hover {
-    .aplayer-button {
-      opacity: 1;
-    }
-  }
-
   .aplayer-button {
     position: absolute;
     border-radius: 50%;
-    opacity: 0.8;
     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
     background: rgba(0, 0, 0, 0.2);
-    transition: all 0.1s ease;
 
-    .aplayer-fill {
-      fill: #fff;
-    }
-  }
-
-  .aplayer-play {
-    width: 26px;
-    height: 26px;
+    width: 58px;
+    height: 58px;
     border: 2px solid #fff;
-    bottom: 50%;
-    right: 50%;
-    margin: 0 -15px -15px 0;
+    top: 50%;
+    left: 50%;
+    /* 要素の中央を基準にするために自分の幅・高さの半分だけ戻す */
+    transform: translate(-50%, -50%);
+    //bottom: 50%;
+    //right: 50%;
+    //margin: 0 -15px -15px 0;
 
     .aplayer-icon-play {
       position: absolute;
-      top: 3px;
-      left: 4px;
-      height: 20px;
-      width: 20px;
+      top: 50%;
+      left: 50%;
+      padding-left: 5px;
+      transform: translate(-50%, -50%);
+      height: 70%;
+      width: 70%;
     }
-  }
-
-  .aplayer-pause {
-    width: 16px;
-    height: 16px;
-    border: 2px solid #fff;
-    bottom: 4px;
-    right: 4px;
 
     .aplayer-icon-pause {
       position: absolute;
-      top: 2px;
-      left: 2px;
-      height: 12px;
-      width: 12px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      height: 50%;
+      width: 50%;
     }
   }
 }

@@ -48,8 +48,8 @@ export default {
     transformStyle() {
       // transform: translateY(0); -webkit-transform: translateY(0);
       return {
-        transform: `translateY(${-this.currentLineIndex * 16}px)`,
-        webkitTransform: `translateY(${-this.currentLineIndex * 16}px)`,
+        transform: `translateY(${-this.currentLineIndex * 16 + 16}px)`,
+        webkitTransform: `translateY(${-this.currentLineIndex * 16 + 16}px)`,
       }
     },
   },
@@ -96,7 +96,7 @@ export default {
   }
 }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 @import "../scss/variables";
 
 .aplayer-lrc {

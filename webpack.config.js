@@ -113,8 +113,9 @@ module.exports = {
       },
       {
         test: /\.svg$/,
+        resourceQuery: /raw/, // 例: import icon from './logo.svg?raw'
         use: [{
-          loader: 'svg-inline-loader',
+          loader: 'raw-loader',
           options: {}
         }],
       },
@@ -129,5 +130,5 @@ module.exports = {
       },
       VERSION: JSON.stringify(require('./package.json').version)
     }),
-  ]
+  ],
 }

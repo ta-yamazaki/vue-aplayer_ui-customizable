@@ -4,15 +4,14 @@
       <h1 align="center">Vue-APlayer</h1>
 
       <aplayer
-        :list='list3'
-        :music='list3[0]'
+        :list='list'
         :muted.sync="muted"
         :volume.sync="volume"
-        autoplay
-        repeat="list"
+        repeat="repeat-all"
+        :showPic="false"
         show-lrc
         shuffle
-        theme="pic"
+        :showControls='["volume", "shuffle", "repeat", "toggleList"]'
       />
 
       <footer></footer>
@@ -32,8 +31,7 @@ export default {
       version: VERSION,
       volume: 1,
       muted: false,
-      music3: null,
-      list3: [
+      list: [
         {
           title: '晴天',
           artist: '周杰伦',

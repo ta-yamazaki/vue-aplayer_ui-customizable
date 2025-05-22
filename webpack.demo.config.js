@@ -1,5 +1,6 @@
 const path = require('path')
 const webpack = require('webpack')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
 module.exports = {
@@ -86,8 +87,9 @@ module.exports = {
       },
       {
         test: /\.svg$/,
+        resourceQuery: /raw/, // 例: import icon from './logo.svg?raw'
         use: [{
-          loader: 'svg-inline-loader',
+          loader: 'raw-loader',
           options: {}
         }],
       },
@@ -101,24 +103,13 @@ module.exports = {
     compress: true,
     port: 3000,
     host: '0.0.0.0',
-    proxy:
-      [
-        {
-          context: ['/aplayer'],
-          target: 'https://cn-east-17-aplayer-35525609.oss.dogecdn.com/',
-          secure: false,
-          changeOrigin: true,
-          headers: {
-            host: 'vue-aplayer.js.org',
-            Referer: 'https://vue-aplayer.js.org/',
-            pathRewrite(path) {
-              return path.replace(/^\/aplayer/, '')
-            },
-          },
-        },
-      ],
   },
   plugins: [
+    new HtmlWebpackPlugin({
+      filename: 'index.html',
+      template: 'src/demo/index.html',
+      favicon: 'src/demo/favicon.ico',
+    }),
     new VueLoaderPlugin(),
     new webpack.DefinePlugin({
       // 'process.env': {

@@ -10,11 +10,12 @@
     />
     <div class="aplayer-time">
       <div class="aplayer-time-inner">
-        - <span class="aplayer-ptime">{{ secondToTime(stat.playedTime) }}</span> / <span
+        <span class="aplayer-ptime"
+        >{{ secondToTime(stat.playedTime) }}</span> / <span
         class="aplayer-dtime">{{ secondToTime(stat.duration) }}</span>
       </div>
       <volume
-        v-if="!$parent.isMobile"
+        v-if="!$parent.isMobile && showControls.includes('volume')"
         :muted="muted"
         :theme="theme"
         :volume="volume"
@@ -22,21 +23,26 @@
         @togglemute="$emit('togglemute')"
       />
       <icon-button
-        :class="{ 'inactive': !shuffle }"
+        v-if="showControls.includes('shuffle')"
         class="aplayer-icon-mode"
+        :class="{ 'inactive': !shuffle }"
         icon="shuffle"
+        :color="darkThemeColor"
         @click.native="$emit('toggleshuffle')"
       />
       <icon-button
+        v-if="showControls.includes('repeat')"
+        class="aplayer-icon-mode"
         :class="{ 'inactive': repeat === 'no-repeat'}"
         :icon="repeat === 'repeat-one' ? 'repeat-one' : 'repeat-all'"
-        class="aplayer-icon-mode"
+        :color="darkThemeColor"
         @click.native="$emit('nextmode')"
       />
       <icon-button
-        :class="{ 'inactive': !$parent.showList }"
+        v-if="showControls.includes('toggleList')"
         class="aplayer-icon-menu"
-        icon="menu"
+        :icon="$parent.showList ? 'arrow-up' : 'arrow-down'"
+        :color="darkThemeColor"
         @click.native="$emit('togglelist')"
       />
     </div>
@@ -47,6 +53,7 @@
 import IconButton from './aplayer-iconbutton.vue'
 import VProgress from './aplayer-controller-progress.vue'
 import Volume from './aplayer-controller-volume.vue'
+import {darkenColor} from "../colorUtils";
 
 export default {
   components: {
@@ -54,7 +61,7 @@ export default {
     VProgress,
     Volume,
   },
-  props: ['shuffle', 'repeat', 'stat', 'theme', 'volume', 'muted'],
+  props: ['shuffle', 'repeat', 'stat', 'theme', 'volume', 'muted', 'showControls'],
   computed: {
     loadProgress() {
       if (this.stat.duration === 0) return 0
@@ -64,12 +71,14 @@ export default {
       if (this.stat.duration === 0) return 0
       return this.stat.playedTime / this.stat.duration
     },
+    darkThemeColor() {
+      return darkenColor(this.theme)
+    },
   },
   methods: {
     secondToTime(second) {
-      if (isNaN(second)) {
-        return '00:00'
-      }
+      if (isNaN(second)) return '00:00'
+
       const pad0 = (num) => {
         return num < 10 ? '0' + num : '' + num
       }
@@ -84,8 +93,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
-
+<style lang="scss" scoped>
 .aplayer-controller {
   display: flex;
   align-items: center;
@@ -125,24 +133,13 @@ export default {
       }
 
       &.aplayer-icon-menu {
-        display: none;
+        display: block;
       }
     }
 
     .aplayer-volume-wrap + .aplayer-icon {
       margin-left: 0;
     }
-
-    &.aplayer-time-narrow {
-      .aplayer-icon-mode {
-        display: none;
-      }
-
-      .aplayer-icon-menu {
-        display: none;
-      }
-    }
   }
 }
-
 </style>
