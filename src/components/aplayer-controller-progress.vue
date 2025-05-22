@@ -132,7 +132,7 @@ export default {
 <style lang="scss" scoped>
 
 .aplayer-bar-wrap {
-  margin: 0 0 0 5px;
+  margin: 0 9px;
   padding: 4px 0;
   cursor: pointer;
   flex: 1;

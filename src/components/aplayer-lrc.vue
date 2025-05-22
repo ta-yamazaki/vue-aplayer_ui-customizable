@@ -48,8 +48,8 @@ export default {
     transformStyle() {
       // transform: translateY(0); -webkit-transform: translateY(0);
       return {
-        transform: `translateY(${-this.currentLineIndex * 16 + 16}px)`,
-        webkitTransform: `translateY(${-this.currentLineIndex * 16 + 16}px)`,
+        transform: `translateY(${-this.currentLineIndex * 16 + 32}px)`,
+        webkitTransform: `translateY(${-this.currentLineIndex * 16 + 32}px)`,
       }
     },
   },
@@ -138,13 +138,13 @@ export default {
 
   p {
     font-size: 12px;
-    color: #666;
+    color: #000;
     line-height: 16px;
     height: 16px;
     padding: 0;
     margin: 0;
-    transition: all 0.5s ease-out;
-    opacity: 0.4;
+    transition: all 0.4s ease-out;
+    opacity: 0.3;
     overflow: hidden;
 
     &.aplayer-lrc-current {

@@ -1,27 +1,27 @@
 <template>
   <div class="aplayer-controller">
+   <span class="aplayer-ptime"
+         :style="{fontSize: aplayerTimeFontSize}"
+   >{{ secondToTime(stat.playedTime) }}</span>
     <v-progress
       :loadProgress="loadProgress"
       :playProgress="playProgress"
       :theme="theme"
-      large
+      :large="large"
       @dragbegin="val => $emit('dragbegin', val)"
       @dragend="val => $emit('dragend', val)"
       @dragging="val => $emit('dragging', val)"
     />
-    <div class="aplayer-time"
-         :style="{fontSize: aplayerTimeFontSize}">
-      <div class="aplayer-time-inner">
-        <span class="aplayer-ptime"
-        >{{ secondToTime(stat.playedTime) }}</span> / <span
-        class="aplayer-dtime">{{ secondToTime(stat.duration) }}</span>
-      </div>
+    <span class="aplayer-dtime"
+          :style="{fontSize: aplayerTimeFontSize}"
+    >{{ secondToTime(stat.duration) }}</span>
+    <div class="aplayer-time">
       <volume
         v-if="!$parent.isMobile && showControls.includes('volume')"
         :muted="muted"
         :theme="theme"
         :volume="volume"
-        large
+        :large="large"
         @setvolume="v => $emit('setvolume', v)"
         @togglemute="$emit('togglemute')"
       />
@@ -32,7 +32,7 @@
         icon="shuffle"
         :color="darkThemeColor"
         @click.native="$emit('toggleshuffle')"
-        large
+        :large="large"
       />
       <icon-button
         v-if="showControls.includes('repeat')"
@@ -41,15 +41,15 @@
         :icon="repeat === 'repeat-one' ? 'repeat-one' : 'repeat-all'"
         :color="darkThemeColor"
         @click.native="$emit('nextmode')"
-        large
+        :large="large"
       />
       <icon-button
         v-if="showControls.includes('toggleList')"
         class="aplayer-icon-menu"
         :icon="$parent.showList ? 'arrow-up' : 'arrow-down'"
         :color="darkThemeColor"
+        :large="large"
         @click.native="$emit('togglelist')"
-        large
       />
     </div>
   </div>
@@ -81,7 +81,7 @@ export default {
       return darkenColor(this.theme)
     },
     aplayerTimeFontSize() {
-      return this.large ? "14px" : "11px"
+      return this.large ? "12px" : "10px"
     },
   },
   methods: {
@@ -107,6 +107,7 @@ export default {
   display: flex;
   align-items: center;
   position: relative;
+  margin: 4px 6px;
 
   .aplayer-time {
     display: flex;

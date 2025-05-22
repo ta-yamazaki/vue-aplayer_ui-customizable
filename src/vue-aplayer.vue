@@ -39,27 +39,27 @@
         <slot name="display" :current-music="currentMusic" :play-stat="playStat">
           <lyrics :current-music="currentMusic" :play-stat="playStat" v-if="showLrc"/>
         </slot>
-        <controls
-          :shuffle="shouldShuffle"
-          :repeat="repeatMode"
-          :stat="playStat"
-          :volume="audioVolume"
-          :muted="isAudioMuted"
-          :theme="currentTheme"
-          :showControls="showControls"
-          :large="largeControls"
-          @toggleshuffle="shouldShuffle = !shouldShuffle"
-          @togglelist="showList = !showList"
-          @togglemute="toggleMute"
-          @setvolume="setAudioVolume"
-          @dragbegin="onProgressDragBegin"
-          @dragend="onProgressDragEnd"
-          @dragging="onProgressDragging"
-          @nextmode="setNextMode"
-        />
       </div>
     </div>
-    <audio ref="audio"></audio>
+    <controls
+      :shuffle="shouldShuffle"
+      :repeat="repeatMode"
+      :stat="playStat"
+      :volume="audioVolume"
+      :muted="isAudioMuted"
+      :theme="currentTheme"
+      :showControls="showControls"
+      :large="largeControls"
+      @toggleshuffle="shouldShuffle = !shouldShuffle"
+      @togglelist="showList = !showList"
+      @togglemute="toggleMute"
+      @setvolume="setAudioVolume"
+      @dragbegin="onProgressDragBegin"
+      @dragend="onProgressDragEnd"
+      @dragging="onProgressDragging"
+      @nextmode="setNextMode"
+    />
+    <audio ref="audio" />
     <music-list
       :show="showList && !mini"
       :current-music="currentMusic"
@@ -699,7 +699,7 @@ export default VueAPlayer
 
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 @import "./scss/variables";
 
 .aplayer {
